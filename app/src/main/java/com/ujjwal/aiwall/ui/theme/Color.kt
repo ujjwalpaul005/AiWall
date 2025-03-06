@@ -2,10 +2,17 @@ package com.ujjwal.aiwall.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Dark theme colors with neon cyan accent
+val NeonCyan = Color(0xFF00FFFF)
+val LighterCyan = Color(0xFF80FFFF)
+val DarkerCyan = Color(0xFF008B8B)
+val NeonPurple = Color(0xFFBF00FF)
+val DarkBlue = Color(0xFF101035)
+val MediumBlue = Color(0xFF1A1A4A)
+val LightGray = Color(0xFFEEEEEE)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Light theme colors
+val CyanLight = Color(0xFF00CCCC)
+val LighterCyanLight = Color(0xFF00EEEE)
+val DarkerCyanLight = Color(0xFF006666)
+val PurpleLight = Color(0xFF9900CC)
