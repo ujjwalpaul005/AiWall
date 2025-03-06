@@ -1,8 +1,10 @@
 package com.ujjwal.aiwall
 
 import android.Manifest
+import android.app.WallpaperManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -32,10 +34,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
+import coil.imageLoader
 import coil.request.ImageRequest
 import com.ujjwal.aiwall.ui.theme.AiWallTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class MainActivity : ComponentActivity() {
@@ -53,9 +62,9 @@ class MainActivity : ComponentActivity() {
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun GetAndShowWallpaper() {
-    val cntxt: Context = LocalContext.current
+    val cntxt : Context = LocalContext.current
     var isStoragePermissionGranted by remember {
-        mutableStateOf(checkPermissionOf(Manifest.permission.CAMERA, cntxt))
+        mutableStateOf(checkPermissionOf(Manifest.permission.SET_WALLPAPER, cntxt))
     }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -69,9 +78,9 @@ fun GetAndShowWallpaper() {
     if (!isStoragePermissionGranted) {
         Column {
             Button(onClick = {
-                launcher.launch(Manifest.permission.CAMERA)
+                launcher.launch(Manifest.permission.SET_WALLPAPER)
             }) {
-                Text("Please give storage access")
+                Text("Please give SET_WALLPAPER access")
             }
         }
     } else {
@@ -174,7 +183,7 @@ fun WallpaperScreen() {
             }
 
             LaunchedEffect(triggerSearch) {
-                if (triggerSearch) {
+                if(triggerSearch){
                     imageUrls = imageFinder.searchImages(searchQuery, dimensions[0], dimensions[1])
                     triggerSearch = false
                     isLoading = false
@@ -256,7 +265,9 @@ fun PhotosGridScreen(
 
 @Composable
 fun PhotoCard(photoUrl: String) {
-    var isPressed by remember { mutableStateOf(false) }
+    var showFullImage by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val wallpaperManager = remember { WallpaperManager.getInstance(context) }
 
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -270,20 +281,18 @@ fun PhotoCard(photoUrl: String) {
             .clip(RoundedCornerShape(16.dp))
             .border(
                 width = 2.dp,
-                color = if (isPressed)
-                    MaterialTheme.colorScheme.primary
-                else
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
                 shape = RoundedCornerShape(16.dp)
-            ),
+            )
+            .clickable {
+                showFullImage = true
+            },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable { isPressed = !isPressed }
+            modifier = Modifier.fillMaxSize()
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(context = LocalContext.current)
@@ -296,51 +305,132 @@ fun PhotoCard(photoUrl: String) {
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
+        }
+    }
 
-            // Overlay gradient for image title visibility
-            if (isPressed) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                                )
-                            )
-                        )
-                )
-
-                Row(
+    // Full screen image dialog
+    if (showFullImage) {
+        Dialog(
+            onDismissRequest = { showFullImage = false },
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true,
+                usePlatformDefaultWidth = false
+            )
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.8f))
+                    .padding(16.dp)
+                    .clickable { showFullImage = false }
+            ) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                        .fillMaxHeight(0.9f)
+                        .align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Button(
-                        onClick = { /* Set as wallpaper logic */ },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        ),
-                        modifier = Modifier.height(36.dp),
-                        shape = RoundedCornerShape(18.dp)
+                    // Image container (80% of screen)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(1f)
+                            .aspectRatio(0.75f)
+                            .clip(RoundedCornerShape(16.dp))
+                            .border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(16.dp)
+                            )
                     ) {
-                        Text("Set", color = MaterialTheme.colorScheme.onPrimary)
+                        AsyncImage(
+                            model = ImageRequest.Builder(context = LocalContext.current)
+                                .data(photoUrl)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = "Wallpaper image fullscreen",
+                            error = painterResource(R.drawable.ic_launcher_foreground),
+                            placeholder = painterResource(R.drawable.ic_launcher_foreground),
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
                     }
 
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Set wallpaper button
                     Button(
-                        onClick = { /* Download wallpaper logic */ },
+                        onClick = {
+                            setWallpaper(context, photoUrl, wallpaperManager)
+                            showFullImage = false
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary
                         ),
-                        modifier = Modifier.height(36.dp),
-                        shape = RoundedCornerShape(18.dp)
+                        modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .height(56.dp),
+                        shape = RoundedCornerShape(28.dp)
                     ) {
-                        Text("Save", color = MaterialTheme.colorScheme.onPrimary)
+                        Text(
+                            "Set as Wallpaper",
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            style = MaterialTheme.typography.titleMedium
+                        )
                     }
                 }
+            }
+        }
+    }
+}
+
+private fun setWallpaper(context: Context, imageUrl: String, wallpaperManager: WallpaperManager) {
+    // Use coroutines to handle the image loading and setting
+    val scope = CoroutineScope(Dispatchers.IO)
+    scope.launch {
+        try {
+            // Download the image
+            val request = ImageRequest.Builder(context)
+                .data(imageUrl)
+                .build()
+
+            val drawable = context.imageLoader.execute(request).drawable
+
+            // Convert drawable to bitmap if possible
+            if (drawable != null) {
+                val bitmap = (drawable as? BitmapDrawable)?.bitmap
+
+                bitmap?.let {
+                    // Set the wallpaper on the IO thread
+                    wallpaperManager.setBitmap(it)
+
+                    // Show success message on the main thread
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            context,
+                            "Wallpaper set successfully",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        context,
+                        "Failed to load image",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(
+                    context,
+                    "Error setting wallpaper: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -355,4 +445,3 @@ fun GreetingPreview() {
         GetAndShowWallpaper()
     }
 }
-
