@@ -18,6 +18,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -308,26 +309,61 @@ fun PhotoCard(photoUrl: String) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.8f))
-                    .padding(16.dp)
+                    .background(Color.Black.copy(alpha = 0.9f))
                     .clickable { showScalingPreview = false }
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.9f)
+                        .fillMaxSize()
+                        .padding(vertical = 8.dp)
                         .align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Wallpaper scaling options
                     var selectedScalingOption by remember { mutableStateOf(WallpaperScaling.SCALE_CROP) }
 
-                    // Scaling Preview
+                    // Preview tabs for Home Screen and Lock Screen
+                    var selectedTab by remember { mutableStateOf(WallpaperPreviewTab.HOME_SCREEN) }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                            .padding(bottom = 8.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        WallpaperPreviewTab.values().forEach { tab ->
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(40.dp)
+                                    .background(
+                                        if (selectedTab == tab)
+                                            MaterialTheme.colorScheme.primary
+                                        else
+                                            MaterialTheme.colorScheme.surface.copy(alpha = 0.3f),
+                                        RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                                    )
+                                    .clickable { selectedTab = tab }
+                                    .padding(8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = tab.displayName,
+                                    color = if (selectedTab == tab)
+                                        MaterialTheme.colorScheme.onPrimary
+                                    else
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+                    }
+
+                    // Scaling Preview with Device Frame - Full Screen
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .fillMaxWidth(0.8f)
-                            .aspectRatio(0.75f)
+                            .fillMaxWidth(0.9f)
                             .clip(RoundedCornerShape(16.dp))
                             .border(
                                 width = 2.dp,
@@ -335,24 +371,37 @@ fun PhotoCard(photoUrl: String) {
                                 shape = RoundedCornerShape(16.dp)
                             )
                     ) {
-                        // Background image
-                        AsyncImage(
-                            model = ImageRequest.Builder(context = LocalContext.current)
-                                .data(photoUrl)
-                                .crossfade(true)
-                                .build(),
-                            contentDescription = "Wallpaper preview",
-                            error = painterResource(R.drawable.ic_launcher_foreground),
-                            placeholder = painterResource(R.drawable.ic_launcher_foreground),
-                            contentScale = when(selectedScalingOption) {
-                                WallpaperScaling.SCALE_CROP -> ContentScale.Crop
-                                WallpaperScaling.SCALE_FIT -> ContentScale.Fit
-                                WallpaperScaling.STRETCH -> ContentScale.FillBounds
-                            },
-                            modifier = Modifier.fillMaxSize()
-                        )
+                        // Phone display area
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black)
+                        ) {
+                            // Background image (wallpaper)
+                            AsyncImage(
+                                model = ImageRequest.Builder(context = LocalContext.current)
+                                    .data(photoUrl)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = "Wallpaper preview",
+                                error = painterResource(R.drawable.ic_launcher_foreground),
+                                placeholder = painterResource(R.drawable.ic_launcher_foreground),
+                                contentScale = when(selectedScalingOption) {
+                                    WallpaperScaling.SCALE_CROP -> ContentScale.Crop
+                                    WallpaperScaling.SCALE_FIT -> ContentScale.Fit
+                                    WallpaperScaling.STRETCH -> ContentScale.FillBounds
+                                },
+                                modifier = Modifier.fillMaxSize()
+                            )
 
-                        // Overlay text showing current scaling mode
+                            // Phone UI overlay based on selected tab
+                            when (selectedTab) {
+                                WallpaperPreviewTab.HOME_SCREEN -> HomeScreenOverlay()
+                                WallpaperPreviewTab.LOCK_SCREEN -> LockScreenOverlay()
+                            }
+                        }
+
+                        // Scaling option info
                         Box(
                             modifier = Modifier
                                 .align(Alignment.TopStart)
@@ -569,6 +618,257 @@ enum class WallpaperScaling(val displayName: String) {
     SCALE_CROP("Center Crop"),
     SCALE_FIT("Fit Screen"),
     STRETCH("Stretch")
+}
+
+// Enum for preview tabs
+enum class WallpaperPreviewTab(val displayName: String) {
+    HOME_SCREEN("Home Screen"),
+    LOCK_SCREEN("Lock Screen")
+}
+
+@Composable
+fun HomeScreenOverlay() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Status bar
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(24.dp)
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "12:34",
+                color = Color.White,
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(Color.White, CircleShape)
+                )
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(Color.White, CircleShape)
+                )
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(Color.White, CircleShape)
+                )
+            }
+        }
+
+        // App icons grid
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(4),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 40.dp)
+                .align(Alignment.Center),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            content = {
+                items(16) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(10.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .background(Color.White.copy(alpha = 0.5f), RoundedCornerShape(6.dp))
+                        )
+                    }
+                }
+            }
+        )
+
+        // Dock
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 20.dp, start = 24.dp, end = 24.dp)
+                .height(60.dp)
+                .background(Color.Black.copy(alpha = 0.3f), RoundedCornerShape(30.dp))
+                .padding(horizontal = 16.dp)
+                .align(Alignment.BottomCenter),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            repeat(5) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color.White.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun LockScreenOverlay() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Status bar
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(24.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "12:34",
+                color = Color.White,
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(Color.White, CircleShape)
+                )
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(Color.White, CircleShape)
+                )
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(Color.White, CircleShape)
+                )
+            }
+        }
+
+        // Lock screen clock
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Large digital clock
+            Text(
+                text = "12:34",
+                color = Color.White,
+                style = MaterialTheme.typography.displayLarge
+            )
+
+            // Date
+            Text(
+                text = "Monday, January 1",
+                color = Color.White,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            // Notification icons
+            Row(
+                modifier = Modifier
+                    .padding(vertical = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                repeat(3) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .background(Color.White.copy(alpha = 0.7f), RoundedCornerShape(4.dp))
+                        )
+                    }
+                }
+            }
+
+            // Lock icon
+            Box(
+                modifier = Modifier
+                    .padding(top = 24.dp)
+                    .size(48.dp)
+                    .background(Color.Black.copy(alpha = 0.3f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .background(Color.White.copy(alpha = 0.8f), CircleShape)
+                )
+            }
+        }
+
+        // Bottom swipe indicator
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 20.dp)
+                .align(Alignment.BottomCenter),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(60.dp)
+                    .height(4.dp)
+                    .background(Color.White, RoundedCornerShape(2.dp))
+            )
+        }
+
+        // Camera and flashlight icons
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp, vertical = 24.dp)
+                .align(Alignment.BottomCenter),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Flashlight icon
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .background(Color.Black.copy(alpha = 0.3f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .background(Color.White.copy(alpha = 0.7f), CircleShape)
+                )
+            }
+
+            // Camera icon
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .background(Color.Black.copy(alpha = 0.3f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .background(Color.White.copy(alpha = 0.7f), CircleShape)
+                )
+            }
+        }
+    }
 }
 
 private fun setWallpaper(
