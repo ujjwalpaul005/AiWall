@@ -56,8 +56,7 @@ fun GetAndShowWallpaper() {
     var isStoragePermissionGranted by remember {
         mutableStateOf(checkPermissionOf(Manifest.permission.SET_WALLPAPER, cntxt))
     }
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
             if (isGranted) {
                 isStoragePermissionGranted = true
@@ -124,15 +123,12 @@ fun WallpaperScreen() {
                     .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
                 placeholder = {
                     Text(
-                        "Search wallpapers...",
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        "Search wallpapers...", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 },
                 leadingIcon = {
                     Icon(
-                        Icons.Default.Search,
-                        contentDescription = "Search",
-                        tint = MaterialTheme.colorScheme.primary
+                        Icons.Default.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.primary
                     )
                 },
                 trailingIcon = {
@@ -162,14 +158,11 @@ fun WallpaperScreen() {
                     triggerSearch = true
                     isLoading = true
                     Toast.makeText(context, "Searching for: $searchQuery", Toast.LENGTH_SHORT).show()
-                },
-                colors = ButtonDefaults.buttonColors(
+                }, colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
-                ),
-                modifier = Modifier
+                ), modifier = Modifier
                     .padding(start = 8.dp)
-                    .height(48.dp),
-                shape = RoundedCornerShape(16.dp)
+                    .height(48.dp), shape = RoundedCornerShape(16.dp)
             ) {
                 Text("Search")
             }
@@ -188,12 +181,10 @@ fun WallpaperScreen() {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
+                    .padding(16.dp), contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(48.dp)
+                    color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(48.dp)
                 )
             }
         }
@@ -206,8 +197,7 @@ fun WallpaperScreen() {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
+                        .padding(32.dp), contentAlignment = Alignment.Center
                 ) {
                     Text(
                         "No images found. Try a different search term.",
@@ -219,8 +209,7 @@ fun WallpaperScreen() {
         } ?: Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(32.dp),
-            contentAlignment = Alignment.Center
+                .padding(32.dp), contentAlignment = Alignment.Center
         ) {
             Text(
                 "Search for wallpapers to get started",
@@ -258,12 +247,9 @@ fun PhotoCard(photoUrl: String) {
     val wallpaperManager = remember { WallpaperManager.getInstance(context) }
 
     Card(
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp,
-            pressedElevation = 8.dp
-        ),
-        modifier = Modifier
+        shape = RoundedCornerShape(16.dp), elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp, pressedElevation = 8.dp
+        ), modifier = Modifier
             .aspectRatio(0.75f)  // Portrait aspect ratio for wallpapers
             .padding(4.dp)
             .clip(RoundedCornerShape(16.dp))
@@ -274,8 +260,7 @@ fun PhotoCard(photoUrl: String) {
             )
             .clickable {
                 showScalingPreview = true
-            },
-        colors = CardDefaults.cardColors(
+            }, colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
@@ -283,10 +268,7 @@ fun PhotoCard(photoUrl: String) {
             modifier = Modifier.fillMaxSize()
         ) {
             AsyncImage(
-                model = ImageRequest.Builder(context = LocalContext.current)
-                    .data(photoUrl)
-                    .crossfade(true)
-                    .build(),
+                model = ImageRequest.Builder(context = LocalContext.current).data(photoUrl).crossfade(true).build(),
                 contentDescription = "Wallpaper image",
                 error = painterResource(R.drawable.ic_launcher_foreground),
                 placeholder = painterResource(R.drawable.ic_launcher_foreground),
@@ -299,19 +281,14 @@ fun PhotoCard(photoUrl: String) {
     // Scaling preview dialog
     if (showScalingPreview) {
         Dialog(
-            onDismissRequest = { showScalingPreview = false },
-            properties = DialogProperties(
-                dismissOnBackPress = true,
-                dismissOnClickOutside = true,
-                usePlatformDefaultWidth = false
+            onDismissRequest = { showScalingPreview = false }, properties = DialogProperties(
+                dismissOnBackPress = true, dismissOnClickOutside = true, usePlatformDefaultWidth = false
             )
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.9f))
-                    .clickable { showScalingPreview = false }
-            ) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.9f))
+                .clickable { showScalingPreview = false }) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -332,27 +309,20 @@ fun PhotoCard(photoUrl: String) {
                         horizontalArrangement = Arrangement.Center
                     ) {
                         WallpaperPreviewTab.values().forEach { tab ->
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(40.dp)
-                                    .background(
-                                        if (selectedTab == tab)
-                                            MaterialTheme.colorScheme.primary
-                                        else
-                                            MaterialTheme.colorScheme.surface.copy(alpha = 0.3f),
-                                        RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-                                    )
-                                    .clickable { selectedTab = tab }
-                                    .padding(8.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
+                            Box(modifier = Modifier
+                                .weight(1f)
+                                .height(40.dp)
+                                .background(
+                                    if (selectedTab == tab) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.surface.copy(alpha = 0.3f),
+                                    RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                                )
+                                .clickable { selectedTab = tab }
+                                .padding(8.dp), contentAlignment = Alignment.Center) {
                                 Text(
                                     text = tab.displayName,
-                                    color = if (selectedTab == tab)
-                                        MaterialTheme.colorScheme.onPrimary
-                                    else
-                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                    color = if (selectedTab == tab) MaterialTheme.colorScheme.onPrimary
+                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
@@ -379,14 +349,12 @@ fun PhotoCard(photoUrl: String) {
                         ) {
                             // Background image (wallpaper)
                             AsyncImage(
-                                model = ImageRequest.Builder(context = LocalContext.current)
-                                    .data(photoUrl)
-                                    .crossfade(true)
-                                    .build(),
+                                model = ImageRequest.Builder(context = LocalContext.current).data(photoUrl)
+                                    .crossfade(true).build(),
                                 contentDescription = "Wallpaper preview",
                                 error = painterResource(R.drawable.ic_launcher_foreground),
                                 placeholder = painterResource(R.drawable.ic_launcher_foreground),
-                                contentScale = when(selectedScalingOption) {
+                                contentScale = when (selectedScalingOption) {
                                     WallpaperScaling.SCALE_CROP -> ContentScale.Crop
                                     WallpaperScaling.SCALE_FIT -> ContentScale.Fit
                                     WallpaperScaling.STRETCH -> ContentScale.FillBounds
@@ -430,30 +398,26 @@ fun PhotoCard(photoUrl: String) {
                     )
 
                     Row(
-                        modifier = Modifier.fillMaxWidth(0.8f),
-                        horizontalArrangement = Arrangement.SpaceEvenly
+                        modifier = Modifier.fillMaxWidth(0.8f), horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         WallpaperScaling.values().forEach { option ->
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
+                            Column(horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
                                     .padding(4.dp)
                                     .clickable { selectedScalingOption = option }
                                     .background(
-                                        if (selectedScalingOption == option)
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                                        else Color.Transparent,
-                                        RoundedCornerShape(8.dp)
+                                        if (selectedScalingOption == option) MaterialTheme.colorScheme.primary.copy(
+                                            alpha = 0.2f
+                                        )
+                                        else Color.Transparent, RoundedCornerShape(8.dp)
                                     )
-                                    .padding(8.dp)
-                            ) {
+                                    .padding(8.dp)) {
                                 Box(
                                     modifier = Modifier
                                         .size(48.dp)
                                         .border(
                                             width = 2.dp,
-                                            color = if (selectedScalingOption == option)
-                                                MaterialTheme.colorScheme.primary
+                                            color = if (selectedScalingOption == option) MaterialTheme.colorScheme.primary
                                             else MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f),
                                             shape = RoundedCornerShape(8.dp)
                                         )
@@ -464,61 +428,54 @@ fun PhotoCard(photoUrl: String) {
                                             .fillMaxSize()
                                             .background(
                                                 when (option) {
-                                                    WallpaperScaling.SCALE_CROP ->
-                                                        Brush.linearGradient(
-                                                            listOf(
-                                                                MaterialTheme.colorScheme.primary,
-                                                                MaterialTheme.colorScheme.secondary
-                                                            )
+                                                    WallpaperScaling.SCALE_CROP -> Brush.linearGradient(
+                                                        listOf(
+                                                            MaterialTheme.colorScheme.primary,
+                                                            MaterialTheme.colorScheme.secondary
                                                         )
+                                                    )
 
-                                                    WallpaperScaling.SCALE_FIT ->
-                                                        Brush.linearGradient(
-                                                            listOf(
-                                                                MaterialTheme.colorScheme.primary,
-                                                                MaterialTheme.colorScheme.secondary
-                                                            )
+                                                    WallpaperScaling.SCALE_FIT -> Brush.linearGradient(
+                                                        listOf(
+                                                            MaterialTheme.colorScheme.primary,
+                                                            MaterialTheme.colorScheme.secondary
                                                         )
+                                                    )
 
-                                                    WallpaperScaling.STRETCH ->
-                                                        Brush.linearGradient(
-                                                            listOf(
-                                                                MaterialTheme.colorScheme.tertiary,
-                                                                MaterialTheme.colorScheme.primary
-                                                            )
+                                                    WallpaperScaling.STRETCH -> Brush.linearGradient(
+                                                        listOf(
+                                                            MaterialTheme.colorScheme.tertiary,
+                                                            MaterialTheme.colorScheme.primary
                                                         )
+                                                    )
                                                 }
                                             )
                                     )
 
                                     // Show icon representation of each option
                                     Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
+                                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                                     ) {
                                         when (option) {
-                                            WallpaperScaling.SCALE_CROP ->
-                                                Box(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth(0.8f)
-                                                        .fillMaxHeight()
-                                                        .background(Color.White.copy(alpha = 0.4f))
-                                                )
+                                            WallpaperScaling.SCALE_CROP -> Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth(0.8f)
+                                                    .fillMaxHeight()
+                                                    .background(Color.White.copy(alpha = 0.4f))
+                                            )
 
-                                            WallpaperScaling.SCALE_FIT ->
-                                                Box(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth(0.7f)
-                                                        .fillMaxHeight(0.7f)
-                                                        .background(Color.White.copy(alpha = 0.4f))
-                                                )
+                                            WallpaperScaling.SCALE_FIT -> Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth(0.7f)
+                                                    .fillMaxHeight(0.7f)
+                                                    .background(Color.White.copy(alpha = 0.4f))
+                                            )
 
-                                            WallpaperScaling.STRETCH ->
-                                                Box(
-                                                    modifier = Modifier
-                                                        .fillMaxSize()
-                                                        .background(Color.White.copy(alpha = 0.4f))
-                                                )
+                                            WallpaperScaling.STRETCH -> Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .background(Color.White.copy(alpha = 0.4f))
+                                            )
                                         }
                                     }
                                 }
@@ -537,13 +494,18 @@ fun PhotoCard(photoUrl: String) {
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Row(
-                        modifier = Modifier.fillMaxWidth(0.8f),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        modifier = Modifier.fillMaxWidth(0.8f), horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         // Set as home screen button
                         Button(
                             onClick = {
-                                setWallpaper(context, photoUrl, wallpaperManager, selectedScalingOption, WallpaperManager.FLAG_SYSTEM)
+                                setWallpaper(
+                                    context,
+                                    photoUrl,
+                                    wallpaperManager,
+                                    selectedScalingOption,
+                                    WallpaperManager.FLAG_SYSTEM
+                                )
                                 showScalingPreview = false
                             },
                             colors = ButtonDefaults.buttonColors(
@@ -565,7 +527,13 @@ fun PhotoCard(photoUrl: String) {
                         // Set as lock screen button
                         Button(
                             onClick = {
-                                setWallpaper(context, photoUrl, wallpaperManager, selectedScalingOption, WallpaperManager.FLAG_LOCK)
+                                setWallpaper(
+                                    context,
+                                    photoUrl,
+                                    wallpaperManager,
+                                    selectedScalingOption,
+                                    WallpaperManager.FLAG_LOCK
+                                )
                                 showScalingPreview = false
                             },
                             colors = ButtonDefaults.buttonColors(
@@ -590,16 +558,19 @@ fun PhotoCard(photoUrl: String) {
                     // Set as both screens button
                     Button(
                         onClick = {
-                            setWallpaper(context, photoUrl, wallpaperManager, selectedScalingOption, WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK)
+                            setWallpaper(
+                                context,
+                                photoUrl,
+                                wallpaperManager,
+                                selectedScalingOption,
+                                WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK
+                            )
                             showScalingPreview = false
-                        },
-                        colors = ButtonDefaults.buttonColors(
+                        }, colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary
-                        ),
-                        modifier = Modifier
+                        ), modifier = Modifier
                             .fillMaxWidth(0.8f)
-                            .height(56.dp),
-                        shape = RoundedCornerShape(28.dp)
+                            .height(56.dp), shape = RoundedCornerShape(28.dp)
                     ) {
                         Text(
                             "Both Screens",
@@ -615,15 +586,12 @@ fun PhotoCard(photoUrl: String) {
 
 // Enum for wallpaper scaling options
 enum class WallpaperScaling(val displayName: String) {
-    SCALE_CROP("Center Crop"),
-    SCALE_FIT("Fit Screen"),
-    STRETCH("Stretch")
+    SCALE_CROP("Center Crop"), SCALE_FIT("Fit Screen"), STRETCH("Stretch")
 }
 
 // Enum for preview tabs
 enum class WallpaperPreviewTab(val displayName: String) {
-    HOME_SCREEN("Home Screen"),
-    LOCK_SCREEN("Lock Screen")
+    HOME_SCREEN("Home Screen"), LOCK_SCREEN("Lock Screen")
 }
 
 @Composable
@@ -639,14 +607,11 @@ fun HomeScreenOverlay() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "12:34",
-                color = Color.White,
-                style = MaterialTheme.typography.bodySmall
+                text = "12:34", color = Color.White, style = MaterialTheme.typography.bodySmall
             )
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
@@ -667,8 +632,7 @@ fun HomeScreenOverlay() {
         }
 
         // App icons grid
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
+        LazyVerticalGrid(columns = GridCells.Fixed(4),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 40.dp)
@@ -690,8 +654,7 @@ fun HomeScreenOverlay() {
                         )
                     }
                 }
-            }
-        )
+            })
 
         // Dock
         Row(
@@ -729,14 +692,11 @@ fun LockScreenOverlay() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "12:34",
-                color = Color.White,
-                style = MaterialTheme.typography.bodySmall
+                text = "12:34", color = Color.White, style = MaterialTheme.typography.bodySmall
             )
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
@@ -765,9 +725,7 @@ fun LockScreenOverlay() {
         ) {
             // Large digital clock
             Text(
-                text = "12:34",
-                color = Color.White,
-                style = MaterialTheme.typography.displayLarge
+                text = "12:34", color = Color.White, style = MaterialTheme.typography.displayLarge
             )
 
             // Date
@@ -780,9 +738,7 @@ fun LockScreenOverlay() {
 
             // Notification icons
             Row(
-                modifier = Modifier
-                    .padding(vertical = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.padding(vertical = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 repeat(3) {
                     Box(
@@ -805,8 +761,7 @@ fun LockScreenOverlay() {
                 modifier = Modifier
                     .padding(top = 24.dp)
                     .size(48.dp)
-                    .background(Color.Black.copy(alpha = 0.3f), CircleShape),
-                contentAlignment = Alignment.Center
+                    .background(Color.Black.copy(alpha = 0.3f), CircleShape), contentAlignment = Alignment.Center
             ) {
                 Box(
                     modifier = Modifier
@@ -837,8 +792,7 @@ fun LockScreenOverlay() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp, vertical = 24.dp)
-                .align(Alignment.BottomCenter),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .align(Alignment.BottomCenter), horizontalArrangement = Arrangement.SpaceBetween
         ) {
             // Flashlight icon
             Box(
@@ -883,10 +837,7 @@ private fun setWallpaper(
     scope.launch {
         try {
             // Download the image
-            val request = ImageRequest.Builder(context)
-                .data(imageUrl)
-                .allowHardware(false)
-                .build()
+            val request = ImageRequest.Builder(context).data(imageUrl).allowHardware(false).build()
 
             val drawable = context.imageLoader.execute(request).drawable
 
@@ -906,10 +857,7 @@ private fun setWallpaper(
                             // Center crop (default Android behavior)
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                 wallpaperManager.setBitmap(
-                                    bitmap,
-                                    null,
-                                    true,
-                                    which
+                                    bitmap, null, true, which
                                 )
                             } else {
                                 wallpaperManager.setBitmap(bitmap)
@@ -940,10 +888,7 @@ private fun setWallpaper(
 
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                 wallpaperManager.setBitmap(
-                                    finalBitmap,
-                                    null,
-                                    true,
-                                    which
+                                    finalBitmap, null, true, which
                                 )
                             } else {
                                 wallpaperManager.setBitmap(finalBitmap)
@@ -953,18 +898,12 @@ private fun setWallpaper(
                         WallpaperScaling.STRETCH -> {
                             // Stretch to fill the entire screen
                             val stretchedBitmap = Bitmap.createScaledBitmap(
-                                bitmap,
-                                screenWidth,
-                                screenHeight,
-                                true
+                                bitmap, screenWidth, screenHeight, true
                             )
 
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                 wallpaperManager.setBitmap(
-                                    stretchedBitmap,
-                                    null,
-                                    true,
-                                    which
+                                    stretchedBitmap, null, true, which
                                 )
                             } else {
                                 wallpaperManager.setBitmap(stretchedBitmap)
@@ -983,18 +922,14 @@ private fun setWallpaper(
                     // Show success message on the main thread
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
-                            context,
-                            "$screenType wallpaper set with ${scaling.displayName} scaling",
-                            Toast.LENGTH_SHORT
+                            context, "$screenType wallpaper set with ${scaling.displayName} scaling", Toast.LENGTH_SHORT
                         ).show()
                     }
                 }
             } else {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
-                        context,
-                        "Failed to load image",
-                        Toast.LENGTH_SHORT
+                        context, "Failed to load image", Toast.LENGTH_SHORT
                     ).show()
                 }
             }
@@ -1002,9 +937,7 @@ private fun setWallpaper(
             e.printStackTrace()
             withContext(Dispatchers.Main) {
                 Toast.makeText(
-                    context,
-                    "Error setting wallpaper: ${e.message}",
-                    Toast.LENGTH_SHORT
+                    context, "Error setting wallpaper: ${e.message}", Toast.LENGTH_SHORT
                 ).show()
             }
         }

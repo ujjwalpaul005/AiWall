@@ -20,13 +20,12 @@ class UnsplashImageSearch {
 
     private val client = OkHttpClient()
 
-    suspend fun searchImages(query: String = "Futuristic Car", height: String = "1920", width: String = "1080"): List<String>? = withContext(Dispatchers.IO) {
+    suspend fun searchImages(
+        query: String = "Futuristic Car", height: String = "1920", width: String = "1080"
+    ): List<String>? = withContext(Dispatchers.IO) {
         val url = "$URL$query"
         try {
-            val request = Request.Builder()
-                .url(url)
-                .addHeader("Authorization", "Client-ID $API_KEY")
-                .build()
+            val request = Request.Builder().url(url).addHeader("Authorization", "Client-ID $API_KEY").build()
 
             val response = client.newCall(request).execute()
 
