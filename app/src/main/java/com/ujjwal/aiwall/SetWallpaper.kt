@@ -252,7 +252,7 @@ fun PhotosGridScreen(
 
 @Composable
 fun PhotoCard(photoUrl: String) {
-    var showFullImage by remember { mutableStateOf(false) }
+    var showScalingPreview by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val wallpaperManager = remember { WallpaperManager.getInstance(context) }
 
@@ -272,7 +272,7 @@ fun PhotoCard(photoUrl: String) {
                 shape = RoundedCornerShape(16.dp)
             )
             .clickable {
-                showFullImage = true
+                showScalingPreview = true
             },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -295,10 +295,10 @@ fun PhotoCard(photoUrl: String) {
         }
     }
 
-    // Full screen image dialog
-    if (showFullImage) {
+    // Scaling preview dialog
+    if (showScalingPreview) {
         Dialog(
-            onDismissRequest = { showFullImage = false },
+            onDismissRequest = { showScalingPreview = false },
             properties = DialogProperties(
                 dismissOnBackPress = true,
                 dismissOnClickOutside = true,
@@ -310,7 +310,7 @@ fun PhotoCard(photoUrl: String) {
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.8f))
                     .padding(16.dp)
-                    .clickable { showFullImage = false }
+                    .clickable { showScalingPreview = false }
             ) {
                 Column(
                     modifier = Modifier
@@ -319,7 +319,10 @@ fun PhotoCard(photoUrl: String) {
                         .align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Image container (80% of screen)
+                    // Wallpaper scaling options
+                    var selectedScalingOption by remember { mutableStateOf(WallpaperScaling.SCALE_CROP) }
+
+                    // Scaling Preview
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -332,106 +335,49 @@ fun PhotoCard(photoUrl: String) {
                                 shape = RoundedCornerShape(16.dp)
                             )
                     ) {
+                        // Background image
                         AsyncImage(
                             model = ImageRequest.Builder(context = LocalContext.current)
                                 .data(photoUrl)
                                 .crossfade(true)
                                 .build(),
-                            contentDescription = "Wallpaper image fullscreen",
+                            contentDescription = "Wallpaper preview",
                             error = painterResource(R.drawable.ic_launcher_foreground),
                             placeholder = painterResource(R.drawable.ic_launcher_foreground),
-                            contentScale = ContentScale.Crop,
+                            contentScale = when(selectedScalingOption) {
+                                WallpaperScaling.SCALE_CROP -> ContentScale.Crop
+                                WallpaperScaling.SCALE_FIT -> ContentScale.Fit
+                                WallpaperScaling.STRETCH -> ContentScale.FillBounds
+                            },
                             modifier = Modifier.fillMaxSize()
                         )
+
+                        // Overlay text showing current scaling mode
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(8.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = selectedScalingOption.displayName,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Wallpaper preview and scaling options
-                    var selectedScalingOption by remember { mutableStateOf(WallpaperScaling.SCALE_CROP) }
-                    var selectedScreenOption by remember { mutableStateOf(WallpaperScreenOption.BOTH) }
-
                     Text(
-                        "Preview & Scaling Options",
+                        "Wallpaper Scaling Options",
                         color = MaterialTheme.colorScheme.onPrimary,
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(bottom = 8.dp)
-                    )
-
-                    // Preview of different scaling options
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.8f)
-                            .height(180.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .border(
-                                width = 2.dp,
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                            .background(Color.Black)
-                    ) {
-                        // Phone frame outline
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(0.6f)
-                                .fillMaxHeight(0.95f)
-                                .align(Alignment.Center)
-                                .border(
-                                    width = 2.dp,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    shape = RoundedCornerShape(16.dp)
-                                )
-                        ) {
-                            // Preview image with selected scaling
-                            AsyncImage(
-                                model = ImageRequest.Builder(context = LocalContext.current)
-                                    .data(photoUrl)
-                                    .crossfade(true)
-                                    .build(),
-                                contentDescription = "Wallpaper preview",
-                                error = painterResource(R.drawable.ic_launcher_foreground),
-                                placeholder = painterResource(R.drawable.ic_launcher_foreground),
-                                contentScale = when (selectedScalingOption) {
-                                    WallpaperScaling.SCALE_CROP -> ContentScale.Crop
-                                    WallpaperScaling.SCALE_FIT -> ContentScale.Fit
-                                    WallpaperScaling.STRETCH -> ContentScale.FillBounds
-                                },
-                                modifier = Modifier.fillMaxSize()
-                            )
-
-                            // Label indicating current screen selection
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .padding(top = 8.dp)
-                                    .background(
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                                        RoundedCornerShape(12.dp)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = when (selectedScreenOption) {
-                                        WallpaperScreenOption.HOME -> "Home Screen"
-                                        WallpaperScreenOption.LOCK -> "Lock Screen"
-                                        WallpaperScreenOption.BOTH -> "Both Screens"
-                                    },
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Scaling options
-                    Text(
-                        "Scaling Options",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.padding(bottom = 4.dp)
                     )
 
                     Row(
@@ -446,7 +392,7 @@ fun PhotoCard(photoUrl: String) {
                                     .clickable { selectedScalingOption = option }
                                     .background(
                                         if (selectedScalingOption == option)
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                                         else Color.Transparent,
                                         RoundedCornerShape(8.dp)
                                     )
@@ -454,7 +400,7 @@ fun PhotoCard(photoUrl: String) {
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(40.dp)
+                                        .size(48.dp)
                                         .border(
                                             width = 2.dp,
                                             color = if (selectedScalingOption == option)
@@ -464,44 +410,67 @@ fun PhotoCard(photoUrl: String) {
                                         )
                                         .padding(4.dp)
                                 ) {
-                                    // Phone screen outline
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .background(
-                                                Brush.linearGradient(
-                                                    listOf(
-                                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
-                                                    )
-                                                )
-                                            )
-                                    ) {
-                                        // Image representation based on scaling type
-                                        Box(
-                                            modifier = Modifier
-                                                .align(Alignment.Center)
-                                                .let {
-                                                    when (option) {
-                                                        WallpaperScaling.SCALE_CROP -> it
-                                                            .fillMaxWidth(1.2f) // Overflow to show cropping
-                                                            .fillMaxHeight(0.9f)
-                                                        WallpaperScaling.SCALE_FIT -> it
-                                                            .fillMaxWidth(0.7f)
-                                                            .fillMaxHeight(0.9f)
-                                                        WallpaperScaling.STRETCH -> it
-                                                            .fillMaxSize(0.9f)
-                                                    }
-                                                }
-                                                .background(
-                                                    Brush.linearGradient(
-                                                        listOf(
-                                                            MaterialTheme.colorScheme.primary,
-                                                            MaterialTheme.colorScheme.secondary
+                                                when (option) {
+                                                    WallpaperScaling.SCALE_CROP ->
+                                                        Brush.linearGradient(
+                                                            listOf(
+                                                                MaterialTheme.colorScheme.primary,
+                                                                MaterialTheme.colorScheme.secondary
+                                                            )
                                                         )
-                                                    )
+
+                                                    WallpaperScaling.SCALE_FIT ->
+                                                        Brush.linearGradient(
+                                                            listOf(
+                                                                MaterialTheme.colorScheme.primary,
+                                                                MaterialTheme.colorScheme.secondary
+                                                            )
+                                                        )
+
+                                                    WallpaperScaling.STRETCH ->
+                                                        Brush.linearGradient(
+                                                            listOf(
+                                                                MaterialTheme.colorScheme.tertiary,
+                                                                MaterialTheme.colorScheme.primary
+                                                            )
+                                                        )
+                                                }
+                                            )
+                                    )
+
+                                    // Show icon representation of each option
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        when (option) {
+                                            WallpaperScaling.SCALE_CROP ->
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth(0.8f)
+                                                        .fillMaxHeight()
+                                                        .background(Color.White.copy(alpha = 0.4f))
                                                 )
-                                        )
+
+                                            WallpaperScaling.SCALE_FIT ->
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth(0.7f)
+                                                        .fillMaxHeight(0.7f)
+                                                        .background(Color.White.copy(alpha = 0.4f))
+                                                )
+
+                                            WallpaperScaling.STRETCH ->
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxSize()
+                                                        .background(Color.White.copy(alpha = 0.4f))
+                                                )
+                                        }
                                     }
                                 }
 
@@ -518,59 +487,62 @@ fun PhotoCard(photoUrl: String) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Screen option selection (Home/Lock/Both)
-                    Text(
-                        "Apply To",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.padding(bottom = 4.dp)
-                    )
-
                     Row(
                         modifier = Modifier.fillMaxWidth(0.8f),
-                        horizontalArrangement = Arrangement.SpaceEvenly
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        WallpaperScreenOption.values().forEach { option ->
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier
-                                    .padding(4.dp)
-                                    .clickable { selectedScreenOption = option }
-                                    .background(
-                                        if (selectedScreenOption == option)
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                                        else Color.Transparent,
-                                        RoundedCornerShape(8.dp)
-                                    )
-                                    .padding(horizontal = 12.dp, vertical = 8.dp)
-                            ) {
-                                Text(
-                                    text = when (option) {
-                                        WallpaperScreenOption.HOME -> "Home"
-                                        WallpaperScreenOption.LOCK -> "Lock"
-                                        WallpaperScreenOption.BOTH -> "Both"
-                                    },
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
+                        // Set as home screen button
+                        Button(
+                            onClick = {
+                                setWallpaper(context, photoUrl, wallpaperManager, selectedScalingOption, WallpaperManager.FLAG_SYSTEM)
+                                showScalingPreview = false
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            ),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(56.dp)
+                                .padding(end = 4.dp),
+                            shape = RoundedCornerShape(28.dp)
+                        ) {
+                            Text(
+                                "Home Screen",
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
+
+                        // Set as lock screen button
+                        Button(
+                            onClick = {
+                                setWallpaper(context, photoUrl, wallpaperManager, selectedScalingOption, WallpaperManager.FLAG_LOCK)
+                                showScalingPreview = false
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary
+                            ),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(56.dp)
+                                .padding(start = 4.dp),
+                            shape = RoundedCornerShape(28.dp)
+                        ) {
+                            Text(
+                                "Lock Screen",
+                                color = MaterialTheme.colorScheme.onSecondary,
+                                style = MaterialTheme.typography.titleSmall
+                            )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // Set wallpaper button
+                    // Set as both screens button
                     Button(
                         onClick = {
-                            setWallpaper(
-                                context,
-                                photoUrl,
-                                wallpaperManager,
-                                selectedScalingOption,
-                                selectedScreenOption
-                            )
-                            showFullImage = false
+                            setWallpaper(context, photoUrl, wallpaperManager, selectedScalingOption, WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK)
+                            showScalingPreview = false
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary
@@ -581,7 +553,7 @@ fun PhotoCard(photoUrl: String) {
                         shape = RoundedCornerShape(28.dp)
                     ) {
                         Text(
-                            text = "Apply Wallpaper",
+                            "Both Screens",
                             color = MaterialTheme.colorScheme.onPrimary,
                             style = MaterialTheme.typography.titleMedium
                         )
@@ -599,17 +571,12 @@ enum class WallpaperScaling(val displayName: String) {
     STRETCH("Stretch")
 }
 
-// Enum for wallpaper screen options
-enum class WallpaperScreenOption {
-    HOME, LOCK, BOTH
-}
-
 private fun setWallpaper(
     context: Context,
     imageUrl: String,
     wallpaperManager: WallpaperManager,
     scaling: WallpaperScaling = WallpaperScaling.SCALE_CROP,
-    screenOption: WallpaperScreenOption = WallpaperScreenOption.BOTH
+    which: Int = WallpaperManager.FLAG_SYSTEM
 ) {
     // Use coroutines to handle the image loading and setting
     val scope = CoroutineScope(Dispatchers.IO)
@@ -633,18 +600,20 @@ private fun setWallpaper(
                     val screenWidth = displayMetrics.widthPixels
                     val screenHeight = displayMetrics.heightPixels
 
-                    // Determine which flags to use based on screen option
-                    val wallpaperFlag = when (screenOption) {
-                        WallpaperScreenOption.HOME -> WallpaperManager.FLAG_SYSTEM
-                        WallpaperScreenOption.LOCK -> WallpaperManager.FLAG_LOCK
-                        WallpaperScreenOption.BOTH -> WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK
-                    }
-
-                    // Process bitmap based on scaling option
-                    val finalBitmap = when (scaling) {
+                    // Apply the selected scaling option
+                    when (scaling) {
                         WallpaperScaling.SCALE_CROP -> {
                             // Center crop (default Android behavior)
-                            bitmap
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                wallpaperManager.setBitmap(
+                                    bitmap,
+                                    null,
+                                    true,
+                                    which
+                                )
+                            } else {
+                                wallpaperManager.setBitmap(bitmap)
+                            }
                         }
 
                         WallpaperScaling.SCALE_FIT -> {
@@ -660,8 +629,8 @@ private fun setWallpaper(
                             val scaledBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
 
                             // Create a new bitmap with screen dimensions (black background)
-                            val resultBitmap = Bitmap.createBitmap(screenWidth, screenHeight, Bitmap.Config.ARGB_8888)
-                            val canvas = Canvas(resultBitmap)
+                            val finalBitmap = Bitmap.createBitmap(screenWidth, screenHeight, Bitmap.Config.ARGB_8888)
+                            val canvas = Canvas(finalBitmap)
                             canvas.drawColor(Color.Black.toArgb())
 
                             // Draw the scaled bitmap centered
@@ -669,44 +638,53 @@ private fun setWallpaper(
                             val top = (screenHeight - newHeight) / 2f
                             canvas.drawBitmap(scaledBitmap, left, top, null)
 
-                            resultBitmap
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                wallpaperManager.setBitmap(
+                                    finalBitmap,
+                                    null,
+                                    true,
+                                    which
+                                )
+                            } else {
+                                wallpaperManager.setBitmap(finalBitmap)
+                            }
                         }
 
                         WallpaperScaling.STRETCH -> {
                             // Stretch to fill the entire screen
-                            Bitmap.createScaledBitmap(
+                            val stretchedBitmap = Bitmap.createScaledBitmap(
                                 bitmap,
                                 screenWidth,
                                 screenHeight,
                                 true
                             )
+
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                wallpaperManager.setBitmap(
+                                    stretchedBitmap,
+                                    null,
+                                    true,
+                                    which
+                                )
+                            } else {
+                                wallpaperManager.setBitmap(stretchedBitmap)
+                            }
                         }
                     }
 
-                    // Set the wallpaper using the appropriate flag
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        wallpaperManager.setBitmap(
-                            finalBitmap,
-                            null,
-                            true,
-                            wallpaperFlag
-                        )
-                    } else {
-                        // For older Android versions that don't support different wallpapers
-                        wallpaperManager.setBitmap(finalBitmap)
+                    // Get the screen type name for the toast message
+                    val screenType = when (which) {
+                        WallpaperManager.FLAG_SYSTEM -> "Home Screen"
+                        WallpaperManager.FLAG_LOCK -> "Lock Screen"
+                        WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK -> "Both Screens"
+                        else -> "Wallpaper"
                     }
 
                     // Show success message on the main thread
                     withContext(Dispatchers.Main) {
-                        val screenMessage = when (screenOption) {
-                            WallpaperScreenOption.HOME -> "Home Screen"
-                            WallpaperScreenOption.LOCK -> "Lock Screen"
-                            WallpaperScreenOption.BOTH -> "Home & Lock Screens"
-                        }
-
                         Toast.makeText(
                             context,
-                            "Wallpaper set for $screenMessage with ${scaling.displayName} scaling",
+                            "$screenType wallpaper set with ${scaling.displayName} scaling",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
