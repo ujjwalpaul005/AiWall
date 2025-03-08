@@ -34,7 +34,11 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -83,12 +87,12 @@ private fun checkPermissionOf(permit: String, cntxt: Context): Boolean {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WallpaperScreen() {
-    var searchQuery by remember { mutableStateOf("Cars") }
+    var searchQuery by remember { mutableStateOf("") }
     val imageFinder = UnsplashImageSearch()
     val dimensions = imageFinder.getScreenDimensions()
     println("dimensions $dimensions")
     var imageUrls by remember { mutableStateOf<List<String>?>(null) }
-    var triggerSearch by remember { mutableStateOf(false) }
+    var triggerSearch by remember { mutableStateOf(true) }
     var isLoading by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
@@ -97,21 +101,11 @@ fun WallpaperScreen() {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // App Title
-        Text(
-            text = "AI Wall",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.CenterHorizontally)
-        )
-
         // Search Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(16.dp, 42.dp, 16.dp, 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextField(
@@ -157,7 +151,7 @@ fun WallpaperScreen() {
                 onClick = {
                     triggerSearch = true
                     isLoading = true
-                    Toast.makeText(context, "Searching for: $searchQuery", Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(context, "Searching for: $searchQuery", Toast.LENGTH_SHORT).show()
                 }, colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 ), modifier = Modifier
@@ -206,15 +200,17 @@ fun WallpaperScreen() {
                     )
                 }
             }
-        } ?: Box(
+        } ?: Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(32.dp), contentAlignment = Alignment.Center
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
-                "Search for wallpapers to get started",
+                "Good wallpapers found with a search, to get started",
                 color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center, fontFamily = FontFamily.Serif
+
             )
         }
     }
@@ -329,11 +325,12 @@ fun PhotoCard(photoUrl: String) {
                         }
                     }
 
-                    // Scaling Preview with Device Frame - Full Screen
+                    // Scaling Preview with Device Frame
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .fillMaxWidth(0.9f)
+                            .fillMaxWidth(0.6f)
+                            .aspectRatio(0.5f)
                             .clip(RoundedCornerShape(16.dp))
                             .border(
                                 width = 2.dp,
@@ -344,8 +341,7 @@ fun PhotoCard(photoUrl: String) {
                         // Phone display area
                         Box(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black)
+                                .align(Alignment.Center)
                         ) {
                             // Background image (wallpaper)
                             AsyncImage(
@@ -368,34 +364,9 @@ fun PhotoCard(photoUrl: String) {
                                 WallpaperPreviewTab.LOCK_SCREEN -> LockScreenOverlay()
                             }
                         }
-
-                        // Scaling option info
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.TopStart)
-                                .padding(8.dp)
-                                .background(
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                                    shape = RoundedCornerShape(4.dp)
-                                )
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = selectedScalingOption.displayName,
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Text(
-                        "Wallpaper Scaling Options",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                    Spacer(modifier = Modifier.height(15.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(0.8f), horizontalArrangement = Arrangement.SpaceEvenly
@@ -491,7 +462,15 @@ fun PhotoCard(photoUrl: String) {
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Apply Wallpaper For",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(0.8f), horizontalArrangement = Arrangement.SpaceBetween
@@ -513,7 +492,7 @@ fun PhotoCard(photoUrl: String) {
                             ),
                             modifier = Modifier
                                 .weight(1f)
-                                .height(56.dp)
+                                .height(48.dp)
                                 .padding(end = 4.dp),
                             shape = RoundedCornerShape(28.dp)
                         ) {
@@ -541,9 +520,9 @@ fun PhotoCard(photoUrl: String) {
                             ),
                             modifier = Modifier
                                 .weight(1f)
-                                .height(56.dp)
+                                .height(48.dp)
                                 .padding(start = 4.dp),
-                            shape = RoundedCornerShape(28.dp)
+                            shape = RoundedCornerShape(20.dp)
                         ) {
                             Text(
                                 "Lock Screen",
@@ -570,7 +549,7 @@ fun PhotoCard(photoUrl: String) {
                             containerColor = MaterialTheme.colorScheme.primary
                         ), modifier = Modifier
                             .fillMaxWidth(0.8f)
-                            .height(56.dp), shape = RoundedCornerShape(28.dp)
+                            .height(48.dp), shape = RoundedCornerShape(20.dp)
                     ) {
                         Text(
                             "Both Screens",
@@ -636,11 +615,11 @@ fun HomeScreenOverlay() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 40.dp)
-                .align(Alignment.Center),
+                .align(Alignment.BottomCenter),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             content = {
-                items(16) {
+                items(4) {
                     Box(
                         modifier = Modifier
                             .size(40.dp)
@@ -656,26 +635,6 @@ fun HomeScreenOverlay() {
                 }
             })
 
-        // Dock
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 20.dp, start = 24.dp, end = 24.dp)
-                .height(60.dp)
-                .background(Color.Black.copy(alpha = 0.3f), RoundedCornerShape(30.dp))
-                .padding(horizontal = 16.dp)
-                .align(Alignment.BottomCenter),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            repeat(5) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(Color.White.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
-                )
-            }
-        }
     }
 }
 
@@ -687,7 +646,7 @@ fun LockScreenOverlay() {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(24.dp)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -736,39 +695,6 @@ fun LockScreenOverlay() {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // Notification icons
-            Row(
-                modifier = Modifier.padding(vertical = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                repeat(3) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(20.dp)
-                                .background(Color.White.copy(alpha = 0.7f), RoundedCornerShape(4.dp))
-                        )
-                    }
-                }
-            }
-
-            // Lock icon
-            Box(
-                modifier = Modifier
-                    .padding(top = 24.dp)
-                    .size(48.dp)
-                    .background(Color.Black.copy(alpha = 0.3f), CircleShape), contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .background(Color.White.copy(alpha = 0.8f), CircleShape)
-                )
-            }
         }
 
         // Bottom swipe indicator
@@ -791,7 +717,7 @@ fun LockScreenOverlay() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 32.dp, vertical = 24.dp)
+                .padding(horizontal = 12.dp, vertical = 10.dp)
                 .align(Alignment.BottomCenter), horizontalArrangement = Arrangement.SpaceBetween
         ) {
             // Flashlight icon
@@ -922,7 +848,7 @@ private fun setWallpaper(
                     // Show success message on the main thread
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
-                            context, "$screenType wallpaper set with ${scaling.displayName} scaling", Toast.LENGTH_SHORT
+                            context, "Wallpaper set to $screenType with ${scaling.displayName} scaling", Toast.LENGTH_SHORT
                         ).show()
                     }
                 }

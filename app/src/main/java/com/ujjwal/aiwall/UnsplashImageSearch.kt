@@ -1,7 +1,7 @@
 package com.ujjwal.aiwall
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -61,11 +61,13 @@ class UnsplashImageSearch {
 
     @Composable
     fun getScreenDimensions(): List<String> {
-        val localConfig = LocalConfiguration.current
-        val height = localConfig.screenHeightDp.toString()
-        val width = localConfig.screenWidthDp.toString()
+        val localConfig = LocalContext.current
+        // Get screen dimensions for proper scaling
+        val displayMetrics = localConfig.resources.displayMetrics
+        val screenWidth = displayMetrics.widthPixels
+        val screenHeight = displayMetrics.heightPixels
 
-        return listOf(height, width)
+        return listOf(screenHeight.toString(), screenWidth.toString())
     }
 
 }
