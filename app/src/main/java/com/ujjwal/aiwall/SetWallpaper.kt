@@ -35,10 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -50,7 +47,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.math.min
 
 
 @RequiresApi(Build.VERSION_CODES.R)
@@ -266,10 +262,10 @@ fun PhotoCard(photoUrl: String) {
             AsyncImage(
                 model = ImageRequest.Builder(context = LocalContext.current).data(photoUrl).crossfade(true).build(),
                 contentDescription = "Wallpaper image",
-                error = painterResource(R.drawable.ic_launcher_foreground),
-                placeholder = painterResource(R.drawable.ic_launcher_foreground),
+                error = painterResource(R.drawable.ic_image_loading),
+                placeholder = painterResource(R.drawable.ic_image_loading),
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.align(Alignment.Center)
             )
         }
     }
@@ -348,14 +344,14 @@ fun PhotoCard(photoUrl: String) {
                                 model = ImageRequest.Builder(context = LocalContext.current).data(photoUrl)
                                     .crossfade(true).build(),
                                 contentDescription = "Wallpaper preview",
-                                error = painterResource(R.drawable.ic_launcher_foreground),
-                                placeholder = painterResource(R.drawable.ic_launcher_foreground),
+                                error = painterResource(R.drawable.ic_wallpaper_loading),
+                                placeholder = painterResource(R.drawable.ic_wallpaper_loading),
                                 contentScale = when (selectedScalingOption) {
                                     WallpaperScaling.SCALE_CROP -> ContentScale.Crop
                                     WallpaperScaling.SCALE_FIT -> ContentScale.Fit
                                     WallpaperScaling.STRETCH -> ContentScale.FillBounds
                                 },
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.align(Alignment.Center)
                             )
 
                             // Phone UI overlay based on selected tab
